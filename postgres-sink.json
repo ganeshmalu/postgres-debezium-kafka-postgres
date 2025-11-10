@@ -1,0 +1,48 @@
+{
+  "name": "postgres-audit-sink",
+  "config": {
+    "connector.class": "io.debezium.connector.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+
+    "topics.regex": "postgres\\.source\\.(.*)",
+
+    "connection.url": "jdbc:postgresql://postgres:5432/sourceDBPostgres",
+    "connection.username": "debezium",
+    "connection.password": "debezium",
+
+    "insert.mode": "insert",
+    "auto.create": "false",
+    "auto.evolve": "false",
+
+    "table.name.format": "source_audit.${topic}_audit",
+
+    "transforms": "unwrap,renameTopic,flatten,renameFields,whitelistFields",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.drop.tombstones": "false",
+    "transforms.unwrap.delete.handling.mode": "rewrite",
+    "transforms.unwrap.add.fields": "op,source.ts_ms,source.txId,source.lsn",
+    "transforms.unwrap.add.fields.prefix": "",
+
+    "transforms.renameTopic.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.renameTopic.regex": "postgres\\.source\\.(.*)",
+    "transforms.renameTopic.replacement": "$1",
+
+    "transforms.flatten.type": "org.apache.kafka.connect.transforms.Flatten$Value",
+    "transforms.flatten.delimiter": "_",
+
+    "transforms.renameFields.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
+    "transforms.renameFields.renames": "source_ts_ms:ts_ms,source_txId:txid,source_lsn:lsn",
+
+    "transforms.whitelistFields.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
+    "transforms.whitelistFields.whitelist": "op,id,name,email,created_at,customer_id,amount,status,ts_ms,txid,lsn",
+
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "true",
+
+    "errors.tolerance": "all",
+    "errors.log.enable": "true",
+    "errors.log.include.messages": "true"
+  }
+}

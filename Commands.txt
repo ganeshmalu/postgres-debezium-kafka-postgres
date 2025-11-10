@@ -1,0 +1,28 @@
+docker-compose up -d
+docker-compose down
+
+curl -X POST -H "Content-Type: application/json" --data @postgres-connector.json http://localhost:8083/connectors
+curl -X POST -H "Content-Type: application/json" --data @postgres-sink.json http://localhost:8083/connectors
+
+curl -X DELETE http://localhost:8083/connectors/postgres-source
+curl -X DELETE http://localhost:8083/connectors/postgres-audit-sink
+
+# Check connector status
+curl http://localhost:8083/connectors
+curl http://localhost:8083/connectors/postgres-source-v2/status
+curl http://localhost:8083/connectors/postgres-audit-sink-v2/status
+
+docker exec -it postgres psql -U debezium -d sourceDBPostgres
+
+\dn               -- list schemas
+\dt source.*      -- list tables in schema 'source'
+\dt source_audit.*  -- list tables in schema 'source_audit'
+
+
+INSERT INTO source.customer (name, email)
+VALUES ('Alice', 'alice@example.com'),
+       ('Bob', 'bob@example.com');
+
+INSERT INTO source.orders (customer_id, amount, status)
+VALUES (1, 199.99, 'NEW'),
+       (2, 299.50, 'PENDING');

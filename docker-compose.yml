@@ -1,0 +1,73 @@
+services:
+  # --- PostgreSQL Source ---
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: debezium
+      POSTGRES_PASSWORD: debezium
+      POSTGRES_DB: sourceDBPostgres
+    ports:
+      - "5432:5432"
+    command:
+      [
+        "postgres",
+        "-c", "wal_level=logical",
+        "-c", "max_replication_slots=10",
+        "-c", "max_wal_senders=10"
+      ]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-schemas:/docker-entrypoint-initdb.d  # Contains 01-init.sql
+
+  # --- Debezium Kafka Connect ---
+  connect:
+    image: debezium/connect:2.6
+    container_name: debezium
+    depends_on:
+      - postgres
+    ports:
+      - "8083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: 10.27.117.113:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: postgres_connect_configs
+      OFFSET_STORAGE_TOPIC: postgres_connect_offsets
+      STATUS_STORAGE_TOPIC: postgres_connect_statuses
+
+      # --- Use JSON converters instead of Avro ---
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      KEY_CONVERTER_SCHEMAS_ENABLE: false
+      VALUE_CONVERTER_SCHEMAS_ENABLE: false
+
+      # --- Debezium plugin path ---
+      PLUGIN_PATH: /kafka/connect
+
+    volumes:
+      - connect_data:/kafka/connect/data
+
+  # --- Debezium UI (for managing connectors easily) ---
+  debezium-ui:
+    image: debezium/debezium-ui:2.0.0.Final
+    container_name: debezium-ui
+    ports:
+      - "8084:8080"
+    environment:
+      KAFKA_CONNECT_URIS: http://connect:8083
+    depends_on:
+      - connect
+
+  # --- Kafka UI (for browsing topics visually) ---
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: dev
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 10.27.117.113:9092
+
+volumes:
+  connect_data:
+  postgres_data:
