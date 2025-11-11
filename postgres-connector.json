@@ -12,11 +12,10 @@
     "plugin.name": "pgoutput",
     "slot.name": "debezium_slot",
     "publication.autocreate.mode": "filtered",
-    "schema.include.list": "source",
+    "schema.include.list": "cep_core",
     "tombstones.on.delete": "false",
     "include.schema.changes": "false",
-    "include.before.value": "false",
-
+    "include.before.value": "true",
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
     "value.converter.schemas.enable": "true",
     "key.converter": "org.apache.kafka.connect.json.JsonConverter",

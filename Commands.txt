@@ -9,20 +9,20 @@ curl -X DELETE http://localhost:8083/connectors/postgres-audit-sink
 
 # Check connector status
 curl http://localhost:8083/connectors
-curl http://localhost:8083/connectors/postgres-source-v2/status
-curl http://localhost:8083/connectors/postgres-audit-sink-v2/status
+curl http://localhost:8083/connectors/postgres-source/status
+curl http://localhost:8083/connectors/postgres-audit-sink/status
 
 docker exec -it postgres psql -U debezium -d sourceDBPostgres
 
 \dn               -- list schemas
-\dt source.*      -- list tables in schema 'source'
-\dt source_audit.*  -- list tables in schema 'source_audit'
+\dt cep_core.*      -- list tables in schema 'cep_core'
+\dt cep_core_audit.*  -- list tables in schema 'cep_core_audit'
 
 
-INSERT INTO source.customer (name, email)
+INSERT INTO cep_core.customer (name, email)
 VALUES ('Alice', 'alice@example.com'),
        ('Bob', 'bob@example.com');
 
-INSERT INTO source.orders (customer_id, amount, status)
+INSERT INTO cep_core.orders (customer_id, amount, status)
 VALUES (1, 199.99, 'NEW'),
        (2, 299.50, 'PENDING');

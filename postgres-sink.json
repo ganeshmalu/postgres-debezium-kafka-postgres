@@ -4,7 +4,7 @@
     "connector.class": "io.debezium.connector.jdbc.JdbcSinkConnector",
     "tasks.max": "1",
 
-    "topics.regex": "postgres\\.source\\.(.*)",
+    "topics.regex": "postgres\\.cep_core\\.(.*)",
 
     "connection.url": "jdbc:postgresql://postgres:5432/sourceDBPostgres",
     "connection.username": "debezium",
@@ -14,7 +14,7 @@
     "auto.create": "false",
     "auto.evolve": "false",
 
-    "table.name.format": "source_audit.${topic}_audit",
+    "table.name.format": "cep_core_audit.${topic}_audit",
 
     "transforms": "unwrap,renameTopic,flatten,renameFields,whitelistFields",
     "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
@@ -24,7 +24,7 @@
     "transforms.unwrap.add.fields.prefix": "",
 
     "transforms.renameTopic.type": "org.apache.kafka.connect.transforms.RegexRouter",
-    "transforms.renameTopic.regex": "postgres\\.source\\.(.*)",
+    "transforms.renameTopic.regex": "postgres\\.cep_core\\.(.*)",
     "transforms.renameTopic.replacement": "$1",
 
     "transforms.flatten.type": "org.apache.kafka.connect.transforms.Flatten$Value",
@@ -34,7 +34,7 @@
     "transforms.renameFields.renames": "source_ts_ms:ts_ms,source_txId:txid,source_lsn:lsn",
 
     "transforms.whitelistFields.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
-    "transforms.whitelistFields.whitelist": "op,id,name,email,created_at,customer_id,amount,status,ts_ms,txid,lsn",
+    "transforms.whitelistFields.whitelist": "op,id,name,email,created_by,modified_by,created_at,modified_at,customer_id,amount,status,ts_ms,txid,lsn",
 
     "key.converter": "org.apache.kafka.connect.json.JsonConverter",
     "key.converter.schemas.enable": "false",
