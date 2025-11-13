@@ -4,11 +4,15 @@ docker-compose down
 curl -X POST -H "Content-Type: application/json" --data @postgres-connector.json http://localhost:8083/connectors
 curl -X POST -H "Content-Type: application/json" --data @postgres-sink.json http://localhost:8083/connectors
 
+# Delete the connector
+curl -X PUT http://localhost:8083/connectors/postgres-audit-sink/pause
+curl -X PUT http://localhost:8083/connectors/postgres-source/pause
+
+# Pause the connector
 curl -X DELETE http://localhost:8083/connectors/postgres-source
 curl -X DELETE http://localhost:8083/connectors/postgres-audit-sink
 
 # Check connector status
-curl http://localhost:8083/connectors
 curl http://localhost:8083/connectors/postgres-source/status
 curl http://localhost:8083/connectors/postgres-audit-sink/status
 
